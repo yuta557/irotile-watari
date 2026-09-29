@@ -3524,21 +3524,23 @@ function drawZukan() {
   // 説明（えらんだとき）／ヒント
   if (G.zukanSel) {
     const it = ITEM_BY_ID[G.zukanSel];
-    const pw = Math.min(W - 32, 640), fs = clamp(W * 0.04, 16, 21);
+    const pw = Math.max(Math.min(W - 32, 640), Math.min(W - 16, bw + 40)), fs = clamp(W * 0.04, 16, 21);
     const lines = wrapText(it.desc, fs, pw - 44, '700');
-    const ph = 30 + fs * 1.4 + lines.length * fs * 1.5 + 16;
-    const px = (W - pw) / 2, py = btnY - ph - 12;
+    // 説明は いちばん下に出して、「つぎへ」を すっかり かくす
+    const ch0 = 30 + fs * 1.4 + lines.length * fs * 1.5 + 16, ph = Math.max(ch0, bh + 20);
+    const px = (W - pw) / 2, py = Math.min(btnY + bh + 10, H - L.sa.b - 6) - ph, cy0 = py + (ph - ch0) / 2;
     ctx.save(); ctx.shadowColor = 'rgba(90,70,40,0.25)'; ctx.shadowBlur = 16; ctx.shadowOffsetY = 4;
     ctx.fillStyle = '#FFFDF8'; rr(ctx, px, py, pw, ph, 22); ctx.fill(); ctx.restore();
     ctx.strokeStyle = it.rare ? '#E7B64A' : '#E6DCCB'; ctx.lineWidth = 3; rr(ctx, px, py, pw, ph, 22); ctx.stroke();
-    txt(it.name, px + 22, py + 18 + fs * 0.7, fs * 1.15, '#D0603F', 'left', '800');
-    lines.forEach((l, j) => txt(l, px + 22, py + 26 + fs * 1.4 + fs * 0.75 + j * fs * 1.5, fs, '#3E3A33', 'left', '700'));
+    txt(it.name, px + 22, cy0 + 18 + fs * 0.7, fs * 1.15, '#D0603F', 'left', '800');
+    lines.forEach((l, j) => txt(l, px + 22, cy0 + 26 + fs * 1.4 + fs * 0.75 + j * fs * 1.5, fs, '#3E3A33', 'left', '700'));
     addButton(px, py, pw, ph, () => { G.zukanSel = null; }, false);
   } else if (G.collected.size > 0) {
     const hsz = Math.max(13, 20 * k);
     txt(TEXT.zukanHint, W / 2, hintY, hsz, '#5E6B4E', 'center', '700');
   }
-  if (A.btn) {
+  if (G.zukanSel) { /* 説明が出ているあいだは つぎへ を出さない */ }
+  else if (A.btn) {
     const bob = Math.sin(G.t * 3) * 2;
     ctx.drawImage(A.btn, btnX, btnY + bob, bw, bh);
     addButton(btnX, btnY, bw, bh, enterQuestion);
@@ -3641,20 +3643,22 @@ function drawZukanPortrait() {
   // 説明（えらんだとき）／ヒント
   if (G.zukanSel) {
     const it = ITEM_BY_ID[G.zukanSel];
-    const pw = Math.min(W - 32, 640), fs = clamp(W * 0.04, 15, 21);
+    const pw = Math.max(Math.min(W - 32, 640), Math.min(W - 16, bw + 40)), fs = clamp(W * 0.04, 15, 21);
     const lines = wrapText(it.desc, fs, pw - 44, '700');
-    const ph = 30 + fs * 1.4 + lines.length * fs * 1.5 + 16;
-    const px = (W - pw) / 2, py = btnY - ph - 12;
+    // 説明は いちばん下に出して、「つぎへ」を すっかり かくす
+    const ch0 = 30 + fs * 1.4 + lines.length * fs * 1.5 + 16, ph = Math.max(ch0, bh + 20);
+    const px = (W - pw) / 2, py = Math.min(btnY + bh + 10, H - L.sa.b - 6) - ph, cy0 = py + (ph - ch0) / 2;
     ctx.save(); ctx.shadowColor = 'rgba(40,80,110,0.25)'; ctx.shadowBlur = 16; ctx.shadowOffsetY = 4;
     ctx.fillStyle = '#FFFFFF'; rr(ctx, px, py, pw, ph, 22); ctx.fill(); ctx.restore();
     ctx.strokeStyle = it.rare ? '#F0B429' : '#CBE4F2'; ctx.lineWidth = 3; rr(ctx, px, py, pw, ph, 22); ctx.stroke();
-    txt(it.name, px + 22, py + 18 + fs * 0.7, fs * 1.15, '#2F6FB0', 'left', '800');
-    lines.forEach((l, j) => txt(l, px + 22, py + 26 + fs * 1.4 + fs * 0.75 + j * fs * 1.5, fs, '#26343E', 'left', '700'));
+    txt(it.name, px + 22, cy0 + 18 + fs * 0.7, fs * 1.15, '#2F6FB0', 'left', '800');
+    lines.forEach((l, j) => txt(l, px + 22, cy0 + 26 + fs * 1.4 + fs * 0.75 + j * fs * 1.5, fs, '#26343E', 'left', '700'));
     addButton(px, py, pw, ph, () => { G.zukanSel = null; }, false);
   } else if (G.collected.size > 0) {
     txt(TEXT.zukanHint, W / 2, hintY, Math.max(13, 30 * u), '#2B4A5E', 'center', '700');
   }
-  if (A.pbtn) {
+  if (G.zukanSel) { /* 説明が出ているあいだは つぎへ を出さない */ }
+  else if (A.pbtn) {
     const bob = Math.sin(G.t * 3) * 2;
     ctx.save(); ctx.shadowColor = 'rgba(30,80,140,0.3)'; ctx.shadowBlur = bh * 0.2; ctx.shadowOffsetY = bh * 0.06;
     ctx.drawImage(A.pbtn, btnX, btnY + bob, bw, bh); ctx.restore();
