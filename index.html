@@ -54,7 +54,7 @@ const CONFIG = {
   cols: 5,
   visibleRowsMin: 8,          // 画面に最低限見せる行数
   stepAnimSec: 0.15,
-  pochanReturnSteps: 2,
+  pochanReturnSteps: 2,        // （いまは つかっていない：ミスしたら おなじ行に もどす）
   pochanDelaySec: 0.6,
   pochanLockSec: 0.4,
   footprintFadeSec: 6,
@@ -1108,6 +1108,22 @@ function rescueTarget(S, nearC) {
   return fallbackBelow(S, S.road.N - 1, nearC);
 }
 
+/* ミスした行（なければ その下の行）で、正しく のれて、そこから ゴールまで行けるマス。ミスした列に いちばん近いもの */
+function sameRowTarget(S, r0, c0) {
+  const { cells, alive, reach } = S.road;
+  for (let r = r0; r >= 0; r--) {
+    let best = null;
+    for (let c = 0; c < CONFIG.cols; c++) {
+      const cell = cells[r][c];
+      if (!(cell.kind === 'tile' || cell.kind === 'start') || !alive[r][c] || !reach[r][c]) continue;
+      const q = { r, c };
+      if (!isSafeSpot(S, q, -99)) continue;
+      if (!best || Math.abs(c - c0) < Math.abs(best.c - c0)) best = q;
+    }
+    if (best) return best;
+  }
+  return null;
+}
 function isSafeSpot(S, q, margin) {
   if (!q) return false;
   const al = S.road.alive;
@@ -1120,27 +1136,25 @@ function finishPochan() {
   if (G.state === 'SECTION' && S.hearts === 0) { S.restart = { t: 0 }; S.pending = null; return; }
   let target = null, reset = true;
   if (!pc.rescue) {
-    // 2歩さかのぼる。ただし「そこからまちがえずに進めない所」「すぐ画面の下に消える所」には戻さない
-    const back = CONFIG.pochanReturnSteps;
-    for (let idx = S.hist.length - back; idx < S.hist.length && !target; idx++) {
-      if (idx < 0) continue;
-      if (isSafeSpot(S, S.hist[idx], 1.0)) { target = S.hist[idx]; S.hist.length = idx + 1; reset = false; }
-    }
-    if (!target) {
-      for (let idx = S.hist.length - back - 1; idx >= 0; idx--) if (isSafeSpot(S, S.hist[idx], 1.0)) { target = S.hist[idx]; S.hist.length = idx + 1; reset = false; break; }
-    }
+    // ミスした所と おなじ行の「正しいタイル」に もどす（そこから まちがえずに進める所だけ）。なければ 1行ずつ下を さがす
+    target = sameRowTarget(S, pc.r, pc.c);
     if (!target && S.road.tutorial) target = S.hist[0];
-    if (!target) { const q = fallbackBelow(S, pc.r, pc.c); if (isSafeSpot(S, q, 1.0)) target = q; }
   }
-  if (G.state === 'SECTION' && !isSafeSpot(S, target, 0.6)) { target = rescueTarget(S, p.c); reset = true; }
+  if (G.state === 'SECTION' && !isSafeSpot(S, target, -99)) { target = rescueTarget(S, p.c); reset = true; }
   if (!target) target = { r: 0, c: Math.floor(CONFIG.cols / 2) };
   if (reset) S.hist = [{ r: target.r, c: target.c }];
+  if (DEBUG && G.state === 'SECTION') console.log('[return]', pc.rescue ? 'rescue' : pc.bump ? 'bump' : 'miss', pc.r + '->' + target.r);
   p.fromR = p.r; p.fromC = p.c; p.r = target.r; p.c = target.c;
   p.hopT = 0; p.hopDur = 0.22; p.onLand = null;
   const prev = p.expect;
   p.expect = expectAfter(S.sec, S.road.cells[target.r][target.c], target.r);
   if (p.expect !== prev) S.hudPulse = G.t;
   S.lock = CONFIG.pochanLockSec + 0.22;
+  // 下から せまってくる画面は、もどした所に あわせて リセット（下に よゆうを もどす）
+  if (G.state === 'SECTION') {
+    const want = Math.max(-0.3, target.r + 0.5 - L.visRows * CONFIG.rescueRowRatio);
+    if (want < S.camY) S.camBack = { from: S.camY, to: want, t: 0 };
+  }
   if (S.sec.rule && S.sec.rule.type === 'alt') S.nextHint = { t0: G.t };   // こうごの区間：戻ったら「つぎは ○○」を出す
   if (G.state === 'TUTORIAL' && G.tut.phase === 3) placeStar();
 }
@@ -1220,7 +1234,11 @@ function updatePlay(dt, full) {
   if (G.state !== 'SECTION') return;
 
   // カメラ（道の流れ）
-  if (S.introT > 0) S.introT -= dt;
+  if (S.camBack) {
+    const cb = S.camBack; cb.t += dt;
+    const k = Math.min(1, cb.t / 0.35); S.camY = lerp(cb.from, cb.to, easeOut(k));
+    if (k >= 1) S.camBack = null;
+  } else if (S.introT > 0) S.introT -= dt;
   else {
     const lead = p.r + 0.5 - S.camY, limit = L.visRows * (1 - CONFIG.cameraLeadRatio);
     let sp = S.sec.scrollRowsPerSec;
