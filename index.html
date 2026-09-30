@@ -62,7 +62,7 @@ const CONFIG = {
   catchUpMultiplier: 3.0,     // プレイヤーが画面の上のほうまで進んだときのカメラの速さ倍率
   cameraFollowRatio: 0.4,     // プレイヤーがこの高さ（画面の下から何割）より上にいると、そのぶん下も速く上がってくる
   cameraFollowGain: 1.6,      // そのときの ついてくる強さ（大きいほど ぴったり ついてくる）
-  rareShowSec: 6,
+  rareShowSec: 3.5,           // レアが 光ってから 消えるまでの 秒数（みじかいほど 急がないと とれない）
   comboThresholds: [10, 20],
   masterVolume: 0.35,
   sectionClearSec: 3,
@@ -2768,14 +2768,20 @@ function drawRoad(S, opts) {
       const cx = L.roadX + (c + 0.5) * t, cy = L.playBottom - (r - camY + 0.5) * t;
       if (it.rare) {
         const R = S.rare; if (!R || R.state !== 'active') continue;
-        const blink = R.t < 1.5 ? 0.45 + 0.55 * Math.abs(Math.sin(G.t * 9)) : 1;
-        ctx.save(); ctx.globalAlpha = blink;
+        // だんだん うすく 小さくなって 消えていく。のこり時間は まわりの 金色の わで 見せる
+        const left = clamp(R.t / CONFIG.rareShowSec, 0, 1);
+        const blink = R.t < 1.2 ? 0.55 + 0.45 * Math.abs(Math.sin(G.t * 10)) : 1;
+        ctx.save(); ctx.globalAlpha = blink * (0.35 + 0.65 * left);
+        ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = Math.max(3, t * 0.07);
+        ctx.beginPath(); ctx.arc(cx, cy, t * 0.44, 0, TAU); ctx.stroke();
+        ctx.strokeStyle = '#F2B632'; ctx.lineWidth = Math.max(2.5, t * 0.055); ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.arc(cx, cy, t * 0.44, -Math.PI / 2, -Math.PI / 2 + TAU * left); ctx.stroke();
         const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, t * 0.7);
         grd.addColorStop(0, 'rgba(255,236,150,0.95)'); grd.addColorStop(1, 'rgba(255,236,150,0)');
         ctx.fillStyle = grd; ctx.fillRect(cx - t, cy - t, t * 2, t * 2);
         ctx.strokeStyle = 'rgba(255,245,200,0.9)'; ctx.lineWidth = 2;
         for (let k = 0; k < 8; k++) { const a = k * TAU / 8 + G.t * 1.5, r1_ = t * 0.36, r2 = t * (0.5 + 0.06 * Math.sin(G.t * 6 + k)); ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * r1_, cy + Math.sin(a) * r1_); ctx.lineTo(cx + Math.cos(a) * r2, cy + Math.sin(a) * r2); ctx.stroke(); }
-        drawItem(ctx, it.id, cx, cy + Math.sin(G.t * 4) * 2, t * 0.56);
+        drawItem(ctx, it.id, cx, cy + Math.sin(G.t * 4) * 2, t * 0.56 * (0.7 + 0.3 * left));
         ctx.restore();
       } else {
         ctx.fillStyle = 'rgba(0,0,0,0.18)'; ctx.beginPath(); ctx.ellipse(cx, cy + t * 0.22, t * 0.22, t * 0.07, 0, 0, TAU); ctx.fill();
@@ -3859,6 +3865,7 @@ if (DEBUG && PARAMS.has('start')) {
     if (PARAMS.has('hearts')) { S.hearts = parseInt(PARAMS.get('hearts'), 10); S.heartLostT = G.t; }
     if (PARAMS.get('hint') === '1') S.nextHint = { t0: G.t - 0.3 };
     if (PARAMS.get('miss') === '1') { landWrong(S.road.cells[q.r][q.c]); CONFIG.pochanDelaySec = 99; G.stateT = 0; for (let i = 0; i < 12; i++) update(1 / 60); }
+    if (PARAMS.get('rare') === '1' && S.rare) { S.rare.state = 'active'; S.rare.t = parseFloat(PARAMS.get('rt') || '2'); S.camY = S.rare.r - 5; }
     if (PARAMS.get('runner') === '1') { S.tT = 99; S.tourists.push({ r: q.r + 2, x: -0.8, dir: 1, fast: true, warn: 0.5, sp: 2.8, wob: 0, look: 4, ph: 0 }, { r: q.r + 3, x: 2.3, dir: -1, fast: true, warn: 0, sp: 2.8, wob: 0, look: 4, ph: 1 }); }
     if (PARAMS.get('restart') === '1') { S.hearts = 0; S.restart = { t: 0.5 }; CONFIG.restartSec = 99; }
   }
