@@ -3921,6 +3921,58 @@ if (DEBUG && PARAMS.has('start')) {
   }
 }
 if (DEBUG && PARAMS.get('verify') === '1') { runVerify(); console.log(G.debugMsg); }
+/* ?debug=1&itemcheck=1：見っけものが「正解ルートの どこかから、まちがえずに 寄り道して とれて、そのあと ゴールへ 行けるか」を しらべる */
+if (DEBUG && PARAMS.get('itemcheck') === '1') {
+  const res = { total: 0, fromRoute: 0, bad: [] };
+  for (let sd = 0; sd < 60; sd++) for (let si = 0; si < 3; si++) {
+    G.secDefs = sd % 2 ? makeRunDefs(sd * 31 + 7, true) : CONFIG.sections;
+    const road = generateSection(si, (sd * 7331 + si * 1013) >>> 0), { N, cells, sec } = road, C = CONFIG.cols;
+    const routeSet = new Set(road.route.map(q => q.r * 64 + q.c));
+    for (let r = 0; r < N; r++) for (let c = 0; c < C; c++) {
+      const it = cells[r][c].item; if (!it) continue; res.total++;
+      // 正解ルートの マスから 出発して、この マスに 来られるか
+      let ok = routeSet.has(r * 64 + c), steps = 0;
+      if (!ok) {
+        const seen = new Set(), q = road.route.filter(p => p.r <= r).map(p => [p.r, p.c, 0]);
+        q.forEach(([a, b]) => seen.add(a * 64 + b));
+        for (let qi = 0; qi < q.length && !ok; qi++) {
+          const [rr, cc, d] = q[qi], e = expectAfter(sec, cells[rr][cc], rr);
+          for (const [dr, dc] of MOVES) {
+            const R = rr + dr, Cc = cc + dc, k = R * 64 + Cc;
+            if (R > r || R >= N || Cc < 0 || Cc >= C || seen.has(k) || !passable(cells[R][Cc], e)) continue;
+            if (R === r && Cc === c) { ok = true; steps = d + 1; break; }
+            seen.add(k); q.push([R, Cc, d + 1]);
+          }
+        }
+      }
+      if (ok && road.alive[r][c]) res.fromRoute++; else res.bad.push(`${sec.id}:${sd}:${r},${c}${it.rare ? 'R' : ''}${road.alive[r][c] ? '' : '(dead)'}`);
+    }
+  }
+  G.secDefs = null;
+  console.log('[itemcheck]', JSON.stringify({ total: res.total, ok: res.fromRoute, bad: res.bad.slice(0, 20), nbad: res.bad.length }));
+  // どれくらい手前で 正解ルートから 分かれないと とれないか（区間ごと）
+  const far = {};
+  for (let sd = 0; sd < 60; sd++) for (let si = 0; si < 3; si++) {
+    G.secDefs = sd % 2 ? makeRunDefs(sd * 31 + 7, true) : CONFIG.sections;
+    const road = generateSection(si, (sd * 7331 + si * 1013) >>> 0), { N, cells, sec } = road, C = CONFIG.cols;
+    for (let r = 0; r < N; r++) for (let c = 0; c < C; c++) {
+      if (!cells[r][c].item) continue;
+      let best = -1;
+      for (const s0 of road.route) {
+        if (s0.r > r || s0.r <= best) continue;
+        const seen = new Set([s0.r * 64 + s0.c]), q = [[s0.r, s0.c]]; let hit = s0.r === r && s0.c === c;
+        for (let qi = 0; qi < q.length && !hit; qi++) {
+          const [rr, cc] = q[qi], e = expectAfter(sec, cells[rr][cc], rr);
+          for (const [dr, dc] of MOVES) { const R = rr + dr, Cc = cc + dc, k = R * 64 + Cc; if (R > r || Cc < 0 || Cc >= C || seen.has(k) || !passable(cells[R][Cc], e)) continue; if (R === r && Cc === c) { hit = true; break; } seen.add(k); q.push([R, Cc]); }
+        }
+        if (hit) best = s0.r;
+      }
+      const d = r - best; (far[sec.id] = far[sec.id] || []).push(d);
+    }
+  }
+  G.secDefs = null;
+  for (const k in far) { const a = far[k].sort((x, y) => x - y); console.log('[itemcheck-dist]', k, 'n', a.length, 'max', a[a.length - 1], 'dist', JSON.stringify(a.reduce((m, v) => (m[v] = (m[v] || 0) + 1, m), {}))); }
+}
 
 /* ?debug=1&auto=1：自動で通しプレイして、場面の移り変わりをコンソールに出す（動作確認用） */
 if (DEBUG && PARAMS.get('auto') === '1') {
