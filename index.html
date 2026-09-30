@@ -562,7 +562,15 @@ function buildRoad(sec, rng, itemDefs) {
     for (let i = 0; i < len; i++) {
       const opts = [[0, dir], [0, dir], [1, dir], [1, 0]].filter(([dr, dc]) => {
         const R = br + dr, Cc = bc + dc;
-        return R < N - 1 && Cc >= 0 && Cc < C && cells[R][Cc].kind === 'tile' && cells[R][Cc].src === null;
+        if (!(R < N - 1 && Cc >= 0 && Cc < C && cells[R][Cc].kind === 'tile' && cells[R][Cc].src === null)) return false;
+        // 寄り道は 正解ルートや ほかの寄り道と ならんで走らない（2れつの ひろい道に しない）。出発点だけは となりでよい
+        for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) {
+          const r2 = R + a, c2 = Cc + b;
+          if ((a === 0 && b === 0) || r2 < 0 || r2 >= N || c2 < 0 || c2 >= C || (r2 === br && c2 === bc)) continue;
+          if (path.some(q => q.r === r2 && q.c === c2)) continue;
+          const x = cells[r2][c2]; if (x.src === 'route' || x.src === 'branch') return false;
+        }
+        return true;
       });
       if (!opts.length) break;
       const [dr, dc] = pick(rng, opts); br += dr; bc += dc;
@@ -607,19 +615,28 @@ function buildRoad(sec, rng, itemDefs) {
     made++;
   }
   // 3) 残りのマスを埋める
+  //    正解ルート・寄り道・わな（＝のれる所）の となりには「正解の色」を置かない。
+  //    置くと そこから ひろがって、むだに ふめる ひろい場所が できてしまうため。
+  //    正解の色は、はなれた所に「まどわせる色」として置く
   const pal = sec.palette;
+  const walkable = x => x.src === 'route' || x.src === 'branch' || x.src === 'trap';
+  const nearWalk = (r, c) => [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1]].some(([dr, dc]) => {
+    const R = r + dr, Cc = c + dc; return R >= 0 && Cc >= 0 && Cc < C && walkable(cells[R][Cc]);
+  });
+  const ruleColsAt = r => sec.rule.type === 'alt' ? sec.rule.seq : [ruleForRow(sec, r)];
   for (let rr_ = 1; rr_ < N - 1; rr_++) {
     const row = cells[rr_]; if (row[0].kind !== 'tile') continue;
     const free = row.filter(x => x.src === null);
+    const bad = ruleColsAt(rr_), others = pal.filter(k => !bad.includes(k));
+    const decoyOk = x => { const c = row.indexOf(x); return !nearWalk(rr_, c) && !(c > 0 && bad.includes(row[c - 1].color)) && !(c < C - 1 && bad.includes(row[c + 1].color)); };
     if (sec.rule.type === 'alt') {
-      const [a, b] = sec.rule.seq, others = pal.filter(k => k !== a && k !== b);
-      for (const x of free) { const u = rng(); x.color = u < sec.ruleRatio ? a : u < sec.ruleRatio * 2 ? b : pick(rng, others); x.src = 'fill'; }
+      for (const x of shuffle(free, rng)) { const u = rng(); x.color = decoyOk(x) && u < sec.ruleRatio * 2 ? (u < sec.ruleRatio ? bad[0] : bad[1]) : pick(rng, others); x.src = 'fill'; }
     } else {
-      const rc = ruleForRow(sec, rr_), others = pal.filter(k => k !== rc);
+      const rc = bad[0];
       const have = row.filter(x => x.color === rc).length;
       const want = Math.round(sec.ruleRatio * C + (rng() - 0.5));
-      const extra = clamp(want - have, 0, free.length);
-      shuffle(free, rng).forEach((x, i) => { x.color = i < extra ? rc : pick(rng, others); x.src = 'fill'; });
+      let extra = clamp(want - have, 0, free.length);
+      for (const x of shuffle(free, rng)) { if (extra > 0 && decoyOk(x)) { x.color = rc; extra--; } else x.color = pick(rng, others); x.src = 'fill'; }
     }
     if (row.every(x => x.color === row[0].color)) {
       const f = row.find(x => x.src === 'fill');
