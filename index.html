@@ -2746,7 +2746,13 @@ function drawSpecialRow(S, r, y, kind) {
     ctx.fillStyle = goal ? '#C9A13A' : '#B9AE98';
     for (let i = 0; i * sq < w - gap * 4; i++) if (i % 2 === 0) { ctx.fillRect(x + gap * 2 + i * sq, y + gap * 1.5, sq, sq * 0.6); ctx.fillRect(x + gap * 2 + i * sq, y + t - gap * 1.5 - sq * 0.6, sq, sq * 0.6); }
     const label = goal ? TEXT.goalRow : TEXT.startRow;
-    txt(label, x + w / 2, y + t / 2 + 1, Math.min(t * 0.34, 34), goal ? '#8A6515' : '#8A7F6E', 'center', '800');
+    if (goal) txt(label, x + w / 2, y + t / 2 + 1, Math.min(t * 0.34, 34), '#8A6515', 'center', '800');
+    else {
+      // スタートは まん中に 足あとが のるので、左右に 2つ 書く
+      const fs = fitSize(label, Math.min(t * 0.3, 30), w * 0.34, '800');
+      txt(label, x + w * 0.2, y + t / 2 + 1, fs, '#8A7F6E', 'center', '800');
+      txt(label, x + w * 0.8, y + t / 2 + 1, fs, '#8A7F6E', 'center', '800');
+    }
   } else if (kind === 'marker') {
     const next = ruleForRow(S.sec, r);
     ctx.fillStyle = '#46504D'; rr(ctx, x + gap, y + gap, w - gap * 2, t - gap * 2, t * 0.12); ctx.fill();
@@ -2848,6 +2854,8 @@ function drawHighlights(S) {
   for (const [dr, dc] of MOVES) {
     const r = p.r + dr, c = p.c + dc;
     if (r < 0 || r >= S.road.N || c < 0 || c >= CONFIG.cols) continue;
+    // スタート・ゴール・「ここから」の行は 光らせない（上の 文字が かすんで 見えるので）
+    if (S.road.cells[r][c].kind !== 'tile') continue;
     const x = L.roadX + c * L.tile, y = L.playBottom - (r - S.camY + 1) * L.tile, gap = Math.max(2, L.tile * 0.045);
     ctx.fillStyle = `rgba(255,255,255,${(strong ? 0.2 : 0.1) + pulse * (strong ? 0.18 : 0.08)})`;
     rr(ctx, x + gap, y + gap, L.tile - gap * 2, L.tile - gap * 2, tileGeom(L.tile).r); ctx.fill();
