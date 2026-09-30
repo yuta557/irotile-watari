@@ -1392,6 +1392,18 @@ window.addEventListener('pointercancel', endPointer);
 ['gesturestart', 'gesturechange', 'dblclick', 'contextmenu', 'selectstart'].forEach(ev => document.addEventListener(ev, e => e.preventDefault()));
 window.addEventListener('resize', resize);
 window.addEventListener('orientationchange', () => { resize(); setTimeout(resize, 300); });
+/* スマホでは 画面の大きさや 画素の こまかさ（DPR）が かわっても resize が 来ないことがある
+   （アドレスバーの 出し入れ、アプリから もどったとき、ズームなど）。ときどき たしかめて、ちがったら 作りなおす */
+if (window.visualViewport) window.visualViewport.addEventListener('resize', () => setTimeout(checkScreen, 50));
+document.addEventListener('visibilitychange', () => {
+  // アプリから もどると 絵の しまっておいた分が 消されていることがあるので 作りなおす
+  if (!document.hidden) { if (typeof TITLE_ART !== 'undefined') TITLE_ART.cache = null; if (typeof Q_ART !== 'undefined') Q_ART.cache = null; resize(); }
+});
+function checkScreen() {
+  const d = Math.min(window.devicePixelRatio || 1, 3);
+  if (d !== DPR || window.innerWidth !== W || window.innerHeight !== H) resize();
+}
+setInterval(checkScreen, 1000);
 
 /* =====================================================================
    描画の部品
@@ -1444,7 +1456,7 @@ function drawSwatchSq(g, key, cx, cy, s, ring) {
   const q = Math.max(8, Math.round(s / 4) * 4), ck = key + '|' + q;
   let cv = SWATCH_CACHE.get(ck);
   if (!cv) {
-    const d = Math.min(DPR, 2); cv = document.createElement('canvas'); cv.width = cv.height = Math.ceil(q * d);
+    const d = Math.min(DPR, 3); cv = document.createElement('canvas'); cv.width = cv.height = Math.ceil(q * d);
     const cg = cv.getContext('2d'); cg.scale(d, d); rr(cg, 0, 0, q, q, q * 0.1); cg.clip(); drawTileFace(cg, key, 0, 0, q, 0, true);
     SWATCH_CACHE.set(ck, cv);
   }
@@ -1656,7 +1668,7 @@ function getChunk(theme, N, b) {
   const key = theme + '|' + N + '|' + b;
   let cv = BG.map.get(key);
   if (cv) { BG.map.delete(key); BG.map.set(key, cv); return cv; }
-  const d = Math.min(DPR, 2), K = BG.K, t = L.tile, t0 = performance.now();
+  const d = Math.min(DPR, 3), K = BG.K, t = L.tile, t0 = performance.now();
   BG.made++;
   cv = document.createElement('canvas'); cv.width = Math.ceil(W * d); cv.height = Math.ceil(K * t * d);
   const g = cv.getContext('2d'); g.scale(d, d);
@@ -1803,7 +1815,7 @@ function treeSprite(g, kind, x, y, R, seed, t, pal) {
   const half = Math.ceil(Rk * 1.2 + t * 0.26), size = half * 2;
   let c = TREE_SPR.get(key);
   if (!c) {
-    const d = Math.min(DPR, 2);
+    const d = Math.min(DPR, 3);
     c = document.createElement('canvas'); c.width = c.height = Math.ceil(size * d);
     const cg = c.getContext('2d'); cg.scale(d, d); cg.lineCap = 'round'; cg.lineJoin = 'round';
     if (kind === 'pine') pineTree(cg, half, half, Rk, v * 17 + 3, t);
