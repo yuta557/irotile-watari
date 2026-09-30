@@ -3374,7 +3374,7 @@ function drawPlayScreen() {
       rr(ctx, (W - w) / 2, (L.playTop + L.playBottom) / 2 - h / 2, w, h, 24); ctx.fill();
       txt(TEXT.tutReady, W / 2, (L.playTop + L.playBottom) / 2, clamp(W * 0.09, 32, 52), '#C9553A', 'center', '800');
       ctx.restore();
-    } else drawBubble(T.text, T.phase === 2 ? L.swatch : null);
+    } else drawBubble(T.text, null);
   }
   if (G.state === 'SECTION_CLEAR') drawClearOverlay();
   if (G.state === 'GOAL') drawGoalOverlay();
