@@ -3034,6 +3034,7 @@ function drawHud(S) {
   txt(`${tut ? TEXT.practice : S.sec.name}・${TEXT.now}`, tx, top + h * 0.28, Math.max(12, h * 0.18), INK_SOFT, 'left', '700');
   const big = h * 0.4, name = COLORS[cur].name;
   txt(name, tx, top + h * 0.66, big, INK, 'left', '800');
+  let leftEnd = tx + measure(name, big, '800');
   if (S.sec.rule && S.sec.rule.type === 'alt') {
     const nk = altOther(S.sec, cur), s2 = h * 0.34, ls = Math.max(11, h * 0.17);
     let nx = tx + measure(name, big, '800') + 14;
@@ -3041,6 +3042,7 @@ function drawHud(S) {
     nx += measure('→ ' + TEXT.nextColor, ls, '700') + 6;
     drawSwatchSq(ctx, nk, nx + s2 / 2, top + h * 0.66, s2);
     txt(COLORS[nk].name, nx + s2 + 5, top + h * 0.67, Math.max(12, h * 0.2), INK_SOFT, 'left', '800');
+    leftEnd = nx + s2 + 5 + measure(COLORS[nk].name, Math.max(12, h * 0.2), '800');
   }
   const mx = W - L.sa.r - 12 - 44;
   if (tut) {
@@ -3068,7 +3070,9 @@ function drawHud(S) {
       }
       hx -= 6;
     }
-    txt(`${G.score} ${TEXT.score}`, hx, top + h * 0.77, Math.max(11, h * 0.15), INK_SOFT, 'right', '700');
+    // 点数は、左の 色の 表示と 重なるときは 出さない
+    const sc = `${G.score} ${TEXT.score}`, scs = Math.max(11, h * 0.15);
+    if (hx - measure(sc, scs, '700') > leftEnd + 10) txt(sc, hx, top + h * 0.77, scs, INK_SOFT, 'right', '700');
   }
   // 区間2：もうすぐ色がかわる予告
   if (G.state === 'SECTION' && S.sec.markerRows) {
