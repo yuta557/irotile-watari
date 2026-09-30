@@ -85,6 +85,7 @@ const CONFIG = {
   trapLen: [2, 4],
   sceneryLift: 0.16,          // まわりの景色の明るさ（0 で もとのまま。上げるほど 白っぽく明るい）
   sceneryVivid: 1.22,         // まわりの景色の あざやかさ（1 で もとのまま）
+  oldTitleFallback: false,    // true にすると、絵を よみこむ前に 古いタイトル画面を 出す
   heartsPerSection: 3,        // 区間ごとのハート。0になったら その区間の はじめから
   restartSec: 2.4,
   randomRules: true,          // 「もういっかい」で2周目以降になったら、区間ごとの色をかえる（1周目は下の rule のまま。false でずっと下の rule）
@@ -3304,6 +3305,13 @@ function drawTitleScreen() {
   if (TITLE_ART.ready) {
     drawTitleArt();
     if (DEBUG) drawBtn('けんしょう 50', 16 + L.sa.l, H - L.sa.b - 60, 150, 44, 'secondary', runVerify);
+    return;
+  }
+  // 絵を よみこんでいる あいだは、古いタイトル画面ではなく 空の色だけを 出す（一しゅん 古い画面が 見えないように）
+  if (!CONFIG.oldTitleFallback) {
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#5FA9DF'); g.addColorStop(0.55, '#BFE3F6'); g.addColorStop(1, '#EAF4EE');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
     return;
   }
   drawScene(G.demo, null);
