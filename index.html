@@ -3634,37 +3634,40 @@ function drawZukanPortrait() {
   ctx.drawImage(botc, 0, H - botH, W, botH);
 
   // 文字の大きさの もと（スマホは 画面が せまいぶん 大きめに）
-  const R = G.result, T = TITLES[R.key], u = W < 600 ? W / 760 : Math.max(k, 0.36);
+  // 画面が 低いとき（小さいスマホ・ブラウザの バーが ある時）は、高さに あわせて ぜんぶ 小さくする
+  const hk = clamp((H - L.sa.t - L.sa.b) / 780, 0.62, 1);
+  const R = G.result, T = TITLES[R.key], u = (W < 600 ? W / 760 : Math.max(k, 0.36)) * hk;
   // 見出し（白い ふうせん）
-  let y = L.sa.t + Math.max(34, 100 * u);
-  const hs = Math.max(15, 40 * u), hw = measure(TEXT.zukanTitle, hs, '800') + hs * 1.6, hh2 = hs * 1.9;
+  let y = L.sa.t + Math.max(26, 100 * u);
+  const hs = Math.max(13, 40 * u), hw = measure(TEXT.zukanTitle, hs, '800') + hs * 1.6, hh2 = hs * 1.9;
   ctx.save(); ctx.shadowColor = 'rgba(60,110,150,0.18)'; ctx.shadowBlur = hs * 0.6; ctx.shadowOffsetY = hs * 0.12;
   ctx.fillStyle = 'rgba(255,255,255,0.95)'; rr(ctx, W / 2 - hw / 2, y - hh2 / 2, hw, hh2, hh2 / 2); ctx.fill(); ctx.restore();
   txt(TEXT.zukanTitle, W / 2, y + 1, hs, '#4A4036', 'center', '800');
   // 称号
-  y += Math.max(44, 108 * u);
-  const tsz = Math.max(28, 84 * u), tw = drawRainbowTitle(T.name, W / 2, y, tsz, W * 0.8);
+  y += Math.max(34, 108 * u);
+  const tsz = Math.max(24, 84 * u), tw = drawRainbowTitle(T.name, W / 2, y, tsz, W * 0.8);
   sideTicks(W / 2, y, Math.min(tw, W * 0.8) / 2 + tsz * 0.3, tsz * 0.34, ['#3A9BE0', '#F2C84B', '#3A9BE0'], Math.max(2.5, tsz * 0.07));
-  y += Math.max(34, 92 * u);
-  const ls = fitSize(T.line, Math.max(14, 36 * u), W - 32, '800');
+  y += Math.max(26, 92 * u);
+  const ls = fitSize(T.line, Math.max(12, 36 * u), W - 32, '800');
   txt(T.line, W / 2, y, ls, '#26343E', 'center', '800');
   // あるいた歩数・みつけた数（数だけ 青く 太く）
-  y += Math.max(30, 70 * u);
-  const ss = Math.max(13, 32 * u), ns = ss * 1.2;
+  y += Math.max(22, 70 * u);
+  const ss = Math.max(11, 32 * u), ns = ss * 1.2;
   const parts = [['歩いた歩数 ', ss, '#5A6E80', '700'], [String(G.steps), ns, '#2F6FB0', '800'], ['　　見つけた数 ', ss, '#5A6E80', '700'], [`${G.collected.size}/${ITEMS.length}`, ns, '#2F6FB0', '800']];
   let sw = parts.reduce((a, q) => a + measure(q[0], q[1], q[3]), 0), sx = W / 2 - sw / 2;
   parts.forEach(q => { txt(q[0], sx, y, q[1], q[2], 'left', q[3]); sx += measure(q[0], q[1], q[3]); });
 
   // つぎへ・ヒントの位置
-  const bw = clamp(W * 0.44, 170, 470), bh = bw * 142 / 468;
-  const btnY = H - L.sa.b - bh - Math.max(16, 76 * k), btnX = (W - bw) / 2;
-  const hintY = btnY - Math.max(22, 56 * k);
+  const bw = clamp(W * 0.44 * hk, 140, 470), bh = bw * 142 / 468;
+  const btnY = H - L.sa.b - bh - Math.max(10, 76 * k * hk), btnX = (W - bw) / 2;
+  const hintY = btnY - Math.max(18, 56 * k * hk);
   // カード
-  const cols = W < 600 ? 3 : 4, rows = Math.ceil(ITEMS.length / cols);
-  const gap = Math.max(8, 22 * k), side = Math.max(16, 60 * k), aspect = cols === 3 ? 1.04 : 0.98;
-  const gridTop = y + Math.max(20, 50 * u), gridBot = hintY - Math.max(22, 44 * k);
-  let cw = Math.min((W - side * 2 - gap * (cols - 1)) / cols, ((gridBot - gridTop - gap * (rows - 1)) / rows) / aspect);
-  cw = Math.max(56, cw);
+  // 3れつ（4だん）と 4れつ（3だん）の うち、カードが 大きくなるほうを えらぶ。かならず すきまに おさめる
+  const gap = Math.max(6, 22 * k * hk), side = Math.max(16, 60 * k);
+  const gridTop = y + Math.max(14, 50 * u), gridBot = hintY - Math.max(16, 44 * k * hk);
+  const fitW = (cols, aspect) => { const rows = Math.ceil(ITEMS.length / cols); return Math.min((W - side * 2 - gap * (cols - 1)) / cols, ((gridBot - gridTop - gap * (rows - 1)) / rows) / aspect); };
+  const cols = W >= 600 || fitW(4, 0.98) > fitW(3, 1.04) ? 4 : 3, rows = Math.ceil(ITEMS.length / cols), aspect = cols === 3 ? 1.04 : 0.98;
+  let cw = Math.max(30, fitW(cols, aspect));
   const ch = cw * aspect, gw = cw * cols + gap * (cols - 1), gx = (W - gw) / 2;
   const gy = gridTop + Math.max(0, (gridBot - gridTop - (ch * rows + gap * (rows - 1))) / 2);
   addButton(0, 0, W, H, () => { G.zukanSel = null; }, false);
