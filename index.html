@@ -3333,15 +3333,15 @@ function drawTitleArt() {
   const land = W > H * 1.05, top = L.sa.t, bot = H - L.sa.b;
   // タイトル
   // たて向きは 見本（853×1844）に合わせる：タイトルは はば89%・高さ31%、はじめるは はば54%・高さ74%
-  const lw = land ? Math.min(W * 0.8, (bot - top) * 1.75) : Math.min(W * 0.89, (bot - top) * 0.62), lh = lw * A.logo.height / A.logo.width;
-  const lcy = top + (bot - top) * (land ? 0.34 : 0.31) + Math.sin(G.t * 1.2) * lh * 0.012;
+  const lw = land ? Math.min(W * 0.86, (bot - top) * 1.6) : Math.min(W * 0.89, (bot - top) * 0.62), lh = lw * A.logo.height / A.logo.width;
+  const lcy = top + (bot - top) * (land ? 0.4 : 0.31) + Math.sin(G.t * 1.2) * lh * 0.012;
   ctx.save();
   ctx.shadowColor = 'rgba(25,55,85,0.38)'; ctx.shadowBlur = lw * 0.02; ctx.shadowOffsetY = lw * 0.012;
   ctx.drawImage(A.logo, W / 2 - lw / 2, lcy - lh / 2, lw, lh);
   ctx.restore();
   // はじめる
-  const bw = land ? clamp(lw * 0.34, 230, 440) : clamp(W * 0.54, 200, 560), bh = bw * A.btn.height / A.btn.width;
-  const bcy = Math.max(lcy + lh / 2 + bh * 0.95, top + (bot - top) * (land ? 0.66 : 0.74));
+  const bw = land ? clamp(Math.min(W * 0.37, (bot - top) * 0.5), 230, 560) : clamp(W * 0.54, 200, 560), bh = bw * A.btn.height / A.btn.width;
+  const bcy = Math.max(lcy + lh / 2 + bh * 0.95, top + (bot - top) * (land ? 0.755 : 0.74));
   const pressed = G.titlePress != null, lift = pressed ? 0 : bh * (0.07 + 0.035 * Math.sin(G.t * 3));
   const sc = pressed ? 0.95 : 1, dw = bw * sc, dh = bh * sc;
   if (!G.idle) {
