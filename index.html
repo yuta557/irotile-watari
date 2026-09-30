@@ -90,6 +90,7 @@ const CONFIG = {
   restartSec: 2.4,
   randomRules: true,          // 「もういっかい」で2周目以降になったら、区間ごとの色をかえる（1周目は下の rule のまま。false でずっと下の rule）
   branchLen: [1, 3],
+  maxStraight: 2,             // 正解ルートが まっすぐ上に つづく 最大の行数
   forwardRatio: 0.75,         // 正解ルートで「前」系に進む割合（0.7以上）
   maxGenTries: 20,
   tourist: { intervalMin: 5, intervalMax: 9, cellsPerSec: 1.1,
@@ -533,7 +534,7 @@ function buildRoad(sec, rng, itemDefs) {
   // 1) 正解ルート
   const route = []; let r = 0, c = Math.floor(C / 2), e = startExpect(sec);
   route.push({ r, c });
-  let sideRun = 0, sideDir = 0;
+  let sideRun = 0, sideDir = 0, straightRun = 0, lastDc = 0;
   while (r < N - 1) {
     let nr = r, nc = c, side = false;
     if (sideRun < 2 && cells[r][c].kind === 'tile' && rng() < 1 - (sec.forwardRatio || CONFIG.forwardRatio)) {
@@ -542,8 +543,13 @@ function buildRoad(sec, rng, itemDefs) {
       if (d) { nc = c + d; side = true; sideDir = d; sideRun++; }
     }
     if (!side) {
-      const u = rng(); let dc = u < 0.25 ? -1 : u < 0.5 ? 1 : 0;
+      // まっすぐ上は すくなめ（3割）。2回つづけて まっすぐ だったら かならず ななめに
+      // ななめは 同じ向きに つづけやすくして、2れつの あいだを 行ったり来たり（たての帯）に ならないように
+      const u = rng(); let dc = lastDc && u < 0.45 ? lastDc : u < 0.7 ? (rng() < 0.5 ? -1 : 1) : 0;
+      if (straightRun >= CONFIG.maxStraight) dc = rng() < 0.5 ? -1 : 1;
+      if (c + dc < 0 || c + dc >= C) dc = -dc;
       if (c + dc < 0 || c + dc >= C) dc = 0;
+      straightRun = dc === 0 ? straightRun + 1 : 0; if (dc) lastDc = dc;
       nr = r + 1; nc = c + dc; sideRun = 0; sideDir = 0;
     }
     const cell = cells[nr][nc];
@@ -3938,7 +3944,7 @@ if (DEBUG && PARAMS.get('auto') === '1') {
     const S = G.play;
     if (G.state === 'TITLE') { resetRun(); enterTutorial(); }
     else if (G.state === 'TUTORIAL') { if (G.tut.phase === 4) { /* wait */ } else if (G.stateT > 3) skipTutorial(); else if (inputReady(S)) tapAt(S, S.p.r + 1, S.p.c); }
-    else if (G.state === 'SECTION' && inputReady(S)) {
+    else if (G.state === 'SECTION' && inputReady(S) && !S.restart) {
       if (Math.random() < wrongRate) {
         const bad = MOVES.map(([dr, dc]) => [S.p.r + dr, S.p.c + dc]).filter(([r, c]) => r < S.road.N && c >= 0 && c < CONFIG.cols && !passable(S.road.cells[r][c], S.p.expect));
         if (bad.length) { tapAt(S, bad[0][0], bad[0][1]); return; }
