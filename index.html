@@ -97,15 +97,15 @@ const CONFIG = {
              warnSec: 0 },      // とびだす前に「！」を出す時間（0 で出さずに いきなり来る）
   footColors: ['#4A3A2E', '#C8702F', '#E9A826'],  // コンボ 0 / 10 / 20 の足あとの色
   sections: [
-    { id: 'ujibashi',   name: 'うじばし',       rows: 40, scrollRowsPerSec: 0.45, ruleRatio: 0.45,
+    { id: 'ujibashi',   name: 'うじ橋',       rows: 40, scrollRowsPerSec: 0.45, ruleRatio: 0.45,
       targetSec: 70, theme: 'river',
       palette: ['chairo', 'haiiro', 'shiroishi', 'ai'],
       rule: { type: 'fixed', color: 'chairo' } },
-    { id: 'omotesando', name: 'おもてさんどう', rows: 55, scrollRowsPerSec: 0.60, ruleRatio: 0.38, markerRows: [22, 35],
+    { id: 'omotesando', name: '表参道', rows: 55, scrollRowsPerSec: 0.60, ruleRatio: 0.38, markerRows: [22, 35],
       targetSec: 90, theme: 'shop', tourists: true,
       palette: ['midori', 'ai', 'haiiro', 'shiroishi', 'aka'],
       rule: { type: 'change', seq: ['midori', 'ai', 'midori'] } },   // みどりが メイン。あおは まんなかの みじかい間だけ
-    { id: 'monzen',     name: 'もんぜん',       rows: 55, scrollRowsPerSec: 0.70, ruleRatio: 0.30,
+    { id: 'monzen',     name: '門前',       rows: 55, scrollRowsPerSec: 0.70, ruleRatio: 0.30,
       targetSec: 90, theme: 'garden', gate: true,
       palette: ['aka', 'shiroishi', 'haiiro', 'midori'],
       rule: { type: 'alt', seq: ['aka', 'shiroishi'] } },
@@ -115,89 +115,89 @@ const CONFIG = {
 /* 画面の文字（文言はここで直せます） */
 const TEXT = {
   title: 'いろタイルわたり',
-  subtitle: 'きめた色だけ ふんで、わたろう',
-  start: 'はじめる',
-  touchToStart: 'がめんに タッチしてね',
-  practice: 'れんしゅう',
+  subtitle: '決めた色だけ ふんで、わたろう',
+  start: '始める',
+  touchToStart: '画面に タッチしてね',
+  practice: '練習',
   skip: 'とばす',
-  tut1: 'ひかっている タイルを タップして すすもう',
-  tut2: c => `いまの色は ${c}。${c}だけ ふめるよ`,
-  tut2wrong: 'ちがう色は ミス！ すこし もどるよ',
-  tut3: '★を ふむと あしもと ずかんに のるよ',
+  tut1: '光っている タイルを タップして 進もう',
+  tut2: c => `今の色は ${c}。${c}だけ ふめるよ`,
+  tut2wrong: 'ちがう色は ミス！ 少し もどるよ',
+  tut3: '★を ふむと 足元ずかんに のるよ',
   tutReady: 'じゅんび OK！',
-  now: 'いまの色',
-  nextColor: 'つぎ',
+  now: '今の色',
+  nextColor: '次',
   pochan: 'ミス！',
   bump: 'ドン！',
-  touristHint: 'ひとに ぶつかると もどされるよ',
-  fastHint: 'はしってくる ひとも いるよ！',
+  touristHint: '人に ぶつかると もどされるよ',
+  fastHint: '走ってくる 人も いるよ！',
   heartsOut: 'ハートが なくなっちゃった',
   restart: 'この区間の 最初から もう一度！',
-  nextIs: c => `つぎに ふむのは ${c}`,
+  nextIs: c => `次に ふむのは ${c}`,
   kirari: 'キラッ',
   onlyThis: c => `${c} だけ ふもう！`,
   marker: c => `ここから ${c} だけ！`,
-  soon: c => `もうすぐ ${c} に かわるよ`,
+  soon: c => `もうすぐ ${c} に 変わるよ`,
   markerHere: 'ここから',
   altIntro: 'こうごに ふもう！',
   altSeq: (a, b) => `${a} → ${b} → ${a} …`,
   clear: n => `${n} クリア！`,
-  nextSection: n => `つぎは ${n}`,
-  nextStart: c => `はじめは ${c} だけ`,
+  nextSection: n => `次は ${n}`,
+  nextStart: c => `始めは ${c} だけ`,
   nextAlt: (a, b) => `${a} と ${b} を こうごに`,
-  tapToGo: 'タップで すすむ',
+  tapToGo: 'タップで 進む',
   startRow: 'スタート',
   goalRow: 'ゴール',
   goal: 'ゴール！',
-  found: n => `${n} みっけ！`,
-  score: 'てん',
-  zukanTitle: 'あしもと ずかん',
-  steps: n => `あるいた歩数 ${n}`,
-  foundCount: (n, t) => `みつけた数 ${n}/${t}`,
-  zukanHint: 'みつけた ものを タップしてみよう',
+  found: n => `${n} 見っけ！`,
+  score: '点',
+  zukanTitle: '足元 ずかん',
+  steps: n => `歩いた歩数 ${n}`,
+  foundCount: (n, t) => `見つけた数 ${n}/${t}`,
+  zukanHint: '見つけた ものを タップしてみよう',
   rare: 'レア',
-  nextBtn: 'つぎへ',
-  question: 'かえりみち、きみは どの色を ふんで かえる？',
-  decided: 'きめた！ ためしてみてね',
-  again: 'もういっかい',
-  end: 'おわる',
+  nextBtn: '次へ',
+  question: '帰り道、きみは どの色を ふんで 帰る？',
+  decided: '決めた！ 試してみてね',
+  again: 'もう一回',
+  end: '終わる',
   staffHold: 'タイトルに もどる',
 };
 
 /* 称号（上から順に判定） */
 const TITLES = {
-  yorimichi: { name: 'よりみち めいじん', line: '足元の たからものを ぜんぶ 見のがさない' },
-  kirakira:  { name: 'キラキラ ハンター', line: '一瞬の キラリも 見のがさない' },
-  pitatto:   { name: 'ぴたっと めいじん', line: '一歩も まよわない 足どり' },
-  kaze:      { name: 'かぜの あし',       line: 'まちを かけぬける はやさ' },
-  hakase:    { name: 'いろタイル はかせ', line: 'きょうから きみも いろタイルの はかせ' },
+  yorimichi: { name: 'よりみち 名人', line: '足元の たからものを 全部 見のがさない' },
+  kirakira:  { name: 'キラキラ ハンター', line: 'いっしゅんの キラリも 見のがさない' },
+  pitatto:   { name: 'ぴたっと 名人', line: '一歩も まよわない 足取り' },
+  kaze:      { name: '風の 足',       line: '町を かけぬける 速さ' },
+  hakase:    { name: 'いろタイル はかせ', line: '今日から きみも いろタイルの はかせ' },
 };
 
 /* 色と敷き方（色だけに頼らない：色ごとにタイルの割り付けがちがう） */
 const COLORS = {
-  aka:       { name: 'あか',     hex: '#DC5A3C', pattern: 'brickH' },  // 横長のれんが 2 まい
-  midori:    { name: 'みどり',   hex: '#A8CA5C', pattern: 'quad' },    // 小さい正方形 4 まい
-  chairo:    { name: 'ちゃいろ', hex: '#6A4526', pattern: 'brickV', dark: true },  // たて長のれんが 2 まい
+  aka:       { name: '赤',     hex: '#DC5A3C', pattern: 'brickH' },  // 横長のれんが 2 まい
+  midori:    { name: '緑',   hex: '#A8CA5C', pattern: 'quad' },    // 小さい正方形 4 まい
+  chairo:    { name: '茶色', hex: '#6A4526', pattern: 'brickV', dark: true },  // たて長のれんが 2 まい
   haiiro:    { name: 'はいいろ', hex: '#A3A39D', pattern: 'slab' },    // 御影石のような大きい板 1 まい
-  ai:        { name: 'あお',     hex: '#35558A', pattern: 'mosaic', dark: true },  // こまかい正方形 9 まい
-  shiroishi: { name: 'しろいし', hex: '#ECE6D8', pattern: 'slab' },    // 白っぽい石の板 1 まい
+  ai:        { name: '青',     hex: '#35558A', pattern: 'mosaic', dark: true },  // こまかい正方形 9 まい
+  shiroishi: { name: '白い石', hex: '#ECE6D8', pattern: 'slab' },    // 白っぽい石の板 1 まい
 };
 const QUESTION_COLORS = ['aka', 'midori', 'chairo', 'haiiro', 'ai'];
 
 /* 見っけもの（図鑑データ） */
 const ITEMS = [
-  { id: 'momiji',  sec: 1, rare: false, name: 'もみじの はっぱ',   desc: 'あきに なると 道の 色が かわるね。きみの 道は いま どんな色？' },
-  { id: 'hane',    sec: 1, rare: false, name: 'とりの はね',       desc: 'だれかが 空から おとしていったよ。見上げたら とりは いるかな？' },
-  { id: 'ishi',    sec: 1, rare: false, name: 'かわの まるい いし', desc: '水に けずられて まるくなったよ。まちの 石は どんな形？' },
-  { id: 'kintile', sec: 1, rare: true,  name: 'きんいろの タイル', desc: '一枚だけ ちがう タイル。まちにも 一枚だけ ちがう なにかが あるかも' },
-  { id: 'chaba',   sec: 2, rare: false, name: 'おちゃの はっぱ',   desc: 'いい かおりが するね。まちの かおりに 気づいたこと ある？' },
-  { id: 'ashiato', sec: 2, rare: false, name: 'だれかの あしあと', desc: 'さっき 通った だれかの あと。きみの 前には だれが 歩いたかな？' },
-  { id: 'manhole', sec: 2, rare: false, name: 'マンホールの ふた', desc: 'ふたの もようは まちごとに ちがうよ。きみの まちの ふたは どんな もよう？' },
-  { id: 'neko',    sec: 2, rare: true,  name: 'ねこの あしあと',   desc: 'ねこも この道を 歩いたみたい。ねこの 通り道は どこだろう？' },
-  { id: 'matsu',   sec: 3, rare: false, name: 'まつぼっくり',       desc: '大きな 木の 下には なにかが おちているよ。こんど 見てみよう' },
-  { id: 'hanabira',sec: 3, rare: false, name: 'はなびら',           desc: '風に のって やってきたよ。どこから きたのかな？' },
-  { id: 'kaeru',   sec: 3, rare: false, name: 'ちいさな かえる',   desc: '足元にも 生きものが いるよ。ふまないように 気をつけてね' },
-  { id: 'suzu',    sec: 3, rare: true,  name: 'すず',               desc: 'ちりん と 音が したよ。まちの 音にも 耳を すませてみよう' },
+  { id: 'momiji',  sec: 1, rare: false, name: 'もみじの 葉っぱ',   desc: '秋に なると 道の 色が 変わるね。きみの 道は 今 どんな色？' },
+  { id: 'hane',    sec: 1, rare: false, name: '鳥の 羽',       desc: 'だれかが 空から 落としていったよ。見上げたら 鳥は いるかな？' },
+  { id: 'ishi',    sec: 1, rare: false, name: '川の 丸い 石', desc: '水に けずられて 丸くなったよ。町の 石は どんな形？' },
+  { id: 'kintile', sec: 1, rare: true,  name: '金色の タイル', desc: '一枚だけ ちがう タイル。町にも 一枚だけ ちがう 何かが あるかも' },
+  { id: 'chaba',   sec: 2, rare: false, name: 'お茶の 葉っぱ',   desc: 'いい かおりが するね。町の かおりに 気づいたこと ある？' },
+  { id: 'ashiato', sec: 2, rare: false, name: 'だれかの 足あと', desc: 'さっき 通った だれかの あと。きみの 前には だれが 歩いたかな？' },
+  { id: 'manhole', sec: 2, rare: false, name: 'マンホールの ふた', desc: 'ふたの もようは 町ごとに ちがうよ。きみの 町の ふたは どんな もよう？' },
+  { id: 'neko',    sec: 2, rare: true,  name: 'ねこの 足あと',   desc: 'ねこも この道を 歩いたみたい。ねこの 通り道は どこだろう？' },
+  { id: 'matsu',   sec: 3, rare: false, name: '松ぼっくり',       desc: '大きな 木の 下には 何かが 落ちているよ。今度 見てみよう' },
+  { id: 'hanabira',sec: 3, rare: false, name: '花びら',           desc: '風に 乗って やってきたよ。どこから 来たのかな？' },
+  { id: 'kaeru',   sec: 3, rare: false, name: '小さな かえる',   desc: '足元にも 生き物が いるよ。ふまないように 気を付けてね' },
+  { id: 'suzu',    sec: 3, rare: true,  name: 'すず',               desc: 'ちりん と 音が したよ。町の 音にも 耳を すませてみよう' },
 ];
 const ITEM_BY_ID = Object.fromEntries(ITEMS.map(it => [it.id, it]));
 
@@ -3625,7 +3625,7 @@ function drawZukanPortrait() {
   // あるいた歩数・みつけた数（数だけ 青く 太く）
   y += Math.max(30, 70 * u);
   const ss = Math.max(13, 32 * u), ns = ss * 1.2;
-  const parts = [['あるいた歩数 ', ss, '#5A6E80', '700'], [String(G.steps), ns, '#2F6FB0', '800'], ['　　みつけた数 ', ss, '#5A6E80', '700'], [`${G.collected.size}/${ITEMS.length}`, ns, '#2F6FB0', '800']];
+  const parts = [['歩いた歩数 ', ss, '#5A6E80', '700'], [String(G.steps), ns, '#2F6FB0', '800'], ['　　見つけた数 ', ss, '#5A6E80', '700'], [`${G.collected.size}/${ITEMS.length}`, ns, '#2F6FB0', '800']];
   let sw = parts.reduce((a, q) => a + measure(q[0], q[1], q[3]), 0), sx = W / 2 - sw / 2;
   parts.forEach(q => { txt(q[0], sx, y, q[1], q[2], 'left', q[3]); sx += measure(q[0], q[1], q[3]); });
 
