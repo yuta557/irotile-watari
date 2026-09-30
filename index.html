@@ -3660,13 +3660,13 @@ function drawZukanPortrait() {
   // つぎへ・ヒントの位置
   const bw = clamp(W * 0.44 * hk, 140, 470), bh = bw * 142 / 468;
   const btnY = H - L.sa.b - bh - Math.max(10, 76 * k * hk), btnX = (W - bw) / 2;
-  const hintY = btnY - Math.max(18, 56 * k * hk);
+  const hintY = btnY - Math.max(14, 40 * k * hk);
   // カード
   // 3れつ（4だん）と 4れつ（3だん）の うち、カードが 大きくなるほうを えらぶ。かならず すきまに おさめる
   const gap = Math.max(6, 22 * k * hk), side = Math.max(16, 60 * k);
   const gridTop = y + Math.max(14, 50 * u), gridBot = hintY - Math.max(16, 44 * k * hk);
   const fitW = (cols, aspect) => { const rows = Math.ceil(ITEMS.length / cols); return Math.min((W - side * 2 - gap * (cols - 1)) / cols, ((gridBot - gridTop - gap * (rows - 1)) / rows) / aspect); };
-  const cols = W >= 600 || fitW(4, 0.98) > fitW(3, 1.04) ? 4 : 3, rows = Math.ceil(ITEMS.length / cols), aspect = cols === 3 ? 1.04 : 0.98;
+  const cols = W >= 600 || H / W < 1.9 || fitW(4, 0.98) > fitW(3, 1.04) ? 4 : 3, rows = Math.ceil(ITEMS.length / cols), aspect = cols === 3 ? 1.04 : 0.98;
   let cw = Math.max(30, fitW(cols, aspect));
   const ch = cw * aspect, gw = cw * cols + gap * (cols - 1), gx = (W - gw) / 2;
   const gy = gridTop + Math.max(0, (gridBot - gridTop - (ch * rows + gap * (rows - 1))) / 2);
